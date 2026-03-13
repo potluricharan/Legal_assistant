@@ -8,46 +8,74 @@ from firebase_admin import credentials, firestore
 app = Flask(__name__)
 CORS(app)
 
-# 1. Initialize Firebase
+# --- FIREBASE INITIALIZATION ---
 def init_db():
     if not firebase_admin._apps:
-        # Check for local key file (for your laptop)
-        if os.path.exists("serviceAccountKey.json"):
+        # Check for local key (on your laptop) or Render environment variable
+        if os.path.exists("backend/serviceAccountKey.json"):
+            cred = credentials.Certificate("backend/serviceAccountKey.json")
+            firebase_admin.initialize_app(cred)
+        elif os.path.exists("serviceAccountKey.json"):
             cred = credentials.Certificate("serviceAccountKey.json")
             firebase_admin.initialize_app(cred)
         else:
-            # For Render deployment (using Environment Variable)
+            # This part runs on RENDER
             sa_json = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
             if sa_json:
                 cred = credentials.Certificate(json.loads(sa_json))
                 firebase_admin.initialize_app(cred)
+            else:
+                print("CRITICAL: No Firebase credentials found!")
     return firestore.client()
 
-db = init_db()
+try:
+    db = init_db()
+except Exception as e:
+    print(f"Firebase Init Error: {e}")
+    db = None
 
-# 2. Automated Seeder logic
+# --- AUTOMATED DATA SEEDER ---
 def auto_seed():
-    # Only seed if 'cases' doesn't exist yet
+    if not db: return "Database not connected"
+    
+    # Check if 'cases' collection is empty
     docs = db.collection('cases').limit(1).get()
     if not docs:
-        print("Empty database found. Planting seeds...")
-        # Path must match your backend/mock_data folder
+        print("Empty database. Seeding data...")
+        
+        # 1. Seed Case Data
         case_data = {
             "caseId": "CASE-2026-0042",
-            "title": "State vs. Sharma",
-            "status": "Active"
+            "title": "State vs. Sharma (Financial Fraud)",
+            "status": "Active",
+            "filingDate": "2026-02-15"
         }
         db.collection('cases').add(case_data)
-        print("✅ Data pushed to Firebase!")
+        
+        # 2. Seed Lawyer Data
+        lawyer_data = {
+            "fullName": "Vikram Desai",
+            "barId": "MAH/1024/2012",
+            "status": "Verified"
+        }
+        db.collection('lawyers').add(lawyer_data)
+        
+        return "Database Successfully Seeded!"
+    return "Database already has data."
 
 @app.route('/')
 def home():
-    auto_seed() # Runs the check
-    return jsonify({
-        "status": "online", 
-        "message": "Legal AI Backend Seeded & Ready!"
-    })
+    try:
+        status = auto_seed()
+        return jsonify({
+            "status": "online",
+            "database_status": status,
+            "message": "Legal AI Backend is LIVE"
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)})
 
 if __name__ == "__main__":
+    # Render uses port 10000 by default
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
