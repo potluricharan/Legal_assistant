@@ -10,67 +10,61 @@ app = Flask(__name__)
 CORS(app)
 
 # --- CONFIGURATION ---
-# Set these in your Render Dashboard Environment Variables
 GENAI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GENAI_API_KEY)
 
 def init_db():
     if not firebase_admin._apps:
+        # Check for Render environment variable first
         sa_json = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
         if sa_json:
-            # For Render/Production
             cred = credentials.Certificate(json.loads(sa_json))
             firebase_admin.initialize_app(cred)
+        # Fallback to local keys for Person 2's testing
         elif os.path.exists("backend/serviceAccountKey.json"):
-            # For Local Development
             cred = credentials.Certificate("backend/serviceAccountKey.json")
             firebase_admin.initialize_app(cred)
         else:
+            print("CRITICAL: No Firebase credentials found!")
             return None
     return firestore.client()
 
-db = init_db()
+try:
+    db = init_db()
+except Exception as e:
+    print(f"Firebase Init Error: {e}")
+    db = None
 
-# --- AI ANALYSIS ENDPOINT ---
+# --- AI ANALYSIS ROUTE ---
 @app.route('/api/analyze', methods=['POST'])
 def analyze_document():
     data = request.json
     text_content = data.get("text")
     
     if not text_content:
-        return jsonify({"error": "No text provided"}), 400
+        return jsonify({"error": "No legal text provided"}), 400
 
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = f"""
-        Act as a senior judicial assistant. Analyze the following legal evidence:
-        {text_content}
-        
-        Provide a structured legal brief including:
-        1. Executive Summary
-        2. Key Factual Findings
-        3. Potential Legal Vulnerabilities
-        4. Recommended Next Steps for Investigation
-        """
+        prompt = f"Analyze this legal evidence for a judge. Summarize key facts and identify investigation gaps: {text_content}"
         response = model.generate_content(prompt)
         return jsonify({"analysis": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# --- MOCK DATA RETRIEVAL ---
+# --- DATA SEEDER & MOCK ROUTES ---
 @app.route('/api/mock/<category>', methods=['GET'])
 def get_mock_data(category):
     try:
-        # Matches your backend/mock_data/*.json files
-        file_path = os.path.join(os.path.dirname(__file__), 'mock_data', f'{category}.json')
+        file_path = f"backend/mock_data/{category}.json"
         with open(file_path, 'r') as f:
             return jsonify(json.load(f))
-    except Exception:
-        return jsonify({"error": "Data category not found"}), 404
+    except:
+        return jsonify({"error": "Category not found"}), 404
 
 @app.route('/api/test')
-def test():
-    return jsonify({"status": "online", "message": "Judicial AI Engine is LIVE"})
+def home():
+    return jsonify({"status": "online", "message": "Legal AI Backend is LIVE"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
