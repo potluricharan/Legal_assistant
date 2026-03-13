@@ -11,41 +11,42 @@ CORS(app)
 # 1. Initialize Firebase
 def init_db():
     if not firebase_admin._apps:
+        # Check for local key file (for your laptop)
         if os.path.exists("serviceAccountKey.json"):
             cred = credentials.Certificate("serviceAccountKey.json")
             firebase_admin.initialize_app(cred)
         else:
-            # For Render deployment
-            sa_data = json.loads(os.environ.get('FIREBASE_SERVICE_ACCOUNT'))
-            cred = credentials.Certificate(sa_data)
-            firebase_admin.initialize_app(cred)
+            # For Render deployment (using Environment Variable)
+            sa_json = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
+            if sa_json:
+                cred = credentials.Certificate(json.loads(sa_json))
+                firebase_admin.initialize_app(cred)
     return firestore.client()
 
 db = init_db()
 
-# 2. Automated Seeder
+# 2. Automated Seeder logic
 def auto_seed():
-    # Mapping: "File Name" -> "Firestore Collection Name"
-    seeds = {
-        "mock_data/lawyer.json": "lawyers",
-        "mock_data/background.json": "background_checks",
-        "mock_data/precedent.json": "judgments",
-        "mock_data/mobile.json": "evidence"
-    }
-
-    for file_path, collection in seeds.items():
-        # Only seed if collection is empty to avoid duplicates
-        docs = db.collection(collection).limit(1).get()
-        if not docs and os.path.exists(file_path):
-            with open(file_path, 'r') as f:
-                data = json.load(f)
-                db.collection(collection).add(data)
-                print(f"✅ Seeded {collection} from {file_path}")
+    # Only seed if 'cases' doesn't exist yet
+    docs = db.collection('cases').limit(1).get()
+    if not docs:
+        print("Empty database found. Planting seeds...")
+        # Path must match your backend/mock_data folder
+        case_data = {
+            "caseId": "CASE-2026-0042",
+            "title": "State vs. Sharma",
+            "status": "Active"
+        }
+        db.collection('cases').add(case_data)
+        print("✅ Data pushed to Firebase!")
 
 @app.route('/')
 def home():
-    auto_seed() # Runs check on every refresh
-    return jsonify({"status": "online", "message": "Legal AI Backend Seeded"})
+    auto_seed() # Runs the check
+    return jsonify({
+        "status": "online", 
+        "message": "Legal AI Backend Seeded & Ready!"
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
