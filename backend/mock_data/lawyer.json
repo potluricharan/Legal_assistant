@@ -1,1 +1,11 @@
-{"name": "Vikram Desai", "bar_id": "MAH/1024/2012", "verified": true}
+{
+  "lawyerId": "LWY-9931",
+  "fullName": "Vikram Desai",
+  "barCouncilId": "MAH/1024/2012",
+  "specialization": "Cyber Crime & Financial Fraud",
+  "verificationStatus": "Verified",
+  "yearsOfExperience": 14,
+  "successRate": 78.5,
+  "activeCases": 4,
+  "pastNotableJudgments": ["CASE-2019-112", "CASE-2023-089"]
+}

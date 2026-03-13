@@ -1,0 +1,9 @@
+{
+  "judgmentId": "JUDG-2021-449",
+  "originalCaseTitle": "State vs. Gupta Enterprises",
+  "rulingDate": "2021-11-04",
+  "verdict": "Guilty",
+  "sentencing": "5 years imprisonment, 20 Lakh INR fine",
+  "keyLegalPrecedent": "Digital accounting logs without proper cryptographic signatures can be admitted as secondary evidence under Section 65B of the Indian Evidence Act.",
+  "aiExtractedTags": ["corporate fraud", "digital evidence", "embezzlement", "Section 65B"]
+}

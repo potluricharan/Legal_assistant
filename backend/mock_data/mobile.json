@@ -1,0 +1,25 @@
+{
+  "evidenceId": "EVD-MOB-001",
+  "linkedCaseId": "CASE-2026-0042",
+  "deviceModel": "Apple iPhone 14 Pro",
+  "extractionType": "Logical & Physical",
+  "hashValueMD5": "e99a18c428cb38d5f260853678922e03",
+  "chainOfCustodyMaintained": true,
+  "keyFindings": [
+    {
+      "timestamp": "2026-01-10T14:22:00Z",
+      "type": "WhatsApp Message",
+      "content": "The transfer is done. Delete the logs on the main server.",
+      "sender": "Accused (Rahul)",
+      "isDeleted": true,
+      "recoveredByAI": true
+    },
+    {
+      "timestamp": "2026-01-10T14:25:00Z",
+      "type": "Browser History",
+      "content": "Searched: 'How to permanently wipe AWS S3 buckets'",
+      "isDeleted": false,
+      "recoveredByAI": false
+    }
+  ]
+}

@@ -8,37 +8,44 @@ from firebase_admin import credentials, firestore
 app = Flask(__name__)
 CORS(app)
 
-# --- FIREBASE INITIALIZATION ---
-def init_firebase():
+# 1. Initialize Firebase
+def init_db():
     if not firebase_admin._apps:
-        # Check for local key file first
         if os.path.exists("serviceAccountKey.json"):
             cred = credentials.Certificate("serviceAccountKey.json")
             firebase_admin.initialize_app(cred)
         else:
-            # For Render: Use Environment Variable
-            sa_json = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
-            if sa_json:
-                cred = credentials.Certificate(json.loads(sa_json))
-                firebase_admin.initialize_app(cred)
+            # For Render deployment
+            sa_data = json.loads(os.environ.get('FIREBASE_SERVICE_ACCOUNT'))
+            cred = credentials.Certificate(sa_data)
+            firebase_admin.initialize_app(cred)
     return firestore.client()
 
-db = init_firebase()
+db = init_db()
 
-# --- AUTO-SEEDER ---
-def seed_data():
-    # Only seed if the collection is empty
-    docs = db.collection('lawyer_portfolios').limit(1).get()
-    if not docs:
-        print("Seeding initial mock data...")
-        with open('mock_data/lawyer.json') as f:
-            db.collection('lawyer_portfolios').add(json.load(f))
-        print("Database seeded successfully!")
+# 2. Automated Seeder
+def auto_seed():
+    # Mapping: "File Name" -> "Firestore Collection Name"
+    seeds = {
+        "mock_data/lawyer.json": "lawyers",
+        "mock_data/background.json": "background_checks",
+        "mock_data/precedent.json": "judgments",
+        "mock_data/mobile.json": "evidence"
+    }
+
+    for file_path, collection in seeds.items():
+        # Only seed if collection is empty to avoid duplicates
+        docs = db.collection(collection).limit(1).get()
+        if not docs and os.path.exists(file_path):
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+                db.collection(collection).add(data)
+                print(f"✅ Seeded {collection} from {file_path}")
 
 @app.route('/')
 def home():
-    seed_data()
-    return jsonify({"status": "active", "database": "connected"})
+    auto_seed() # Runs check on every refresh
+    return jsonify({"status": "online", "message": "Legal AI Backend Seeded"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
