@@ -1,1 +1,10 @@
-import React from 'react';import ReactDOM from 'react-dom/client';ReactDOM.createRoot(document.getElementById('root')).render(<h1>Frontend is officially LIVE!</h1>);
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css' // This ensures Tailwind CSS styles load
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
