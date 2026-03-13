@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import UploadZone from './components/UploadZone';
 import VerificationTable from './components/VerificationTable';
+import CasePredictor from './components/CasePredictor'; // <-- 1. Import the new ML component
 
 function App() {
   const [analysis, setAnalysis] = useState("");
 
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-10 font-sans">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Navigation / Header */}
         <header className="flex justify-between items-center mb-10 bg-blue-900 text-white p-6 rounded-2xl shadow-xl">
           <div>
@@ -21,7 +22,7 @@ function App() {
         </header>
 
         <main className="space-y-8">
-          {/* Top Section: Action & AI */}
+          {/* Top Section: Evidence Upload & AI Analysis */}
           <section className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
               <UploadZone onAnalysisComplete={(res) => setAnalysis(res)} />
@@ -45,6 +46,12 @@ function App() {
                 )}
               </div>
             </div>
+          </section>
+
+          {/* Middle Section: ML Case Predictor (Teammate's Feature) */}
+          <section>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Supreme Court Case Prediction</h2>
+            <CasePredictor />
           </section>
 
           {/* Bottom Section: Verification Panels */}

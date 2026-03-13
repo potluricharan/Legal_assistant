@@ -13,5 +13,19 @@ export const api = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
+    }).then(res => res.json()),
+
+    // FEATURE 1: ML Predictor
+    predictOutcome: (text) => fetch(`${BACKEND_URL}/api/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+    }).then(res => res.json()),
+
+    // FEATURE 2: RAG Legal Vault
+    searchVault: (query) => fetch(`${BACKEND_URL}/api/vault/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
     }).then(res => res.json())
 };
