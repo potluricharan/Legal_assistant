@@ -1,21 +1,17 @@
-// This grabs the Render URL from Vercel's environment variables. 
-// If working locally, it falls back to localhost:10000.
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:10000";
+// Vite uses import.meta.env for variables defined in your .env file
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://legal-assistant-3mws.onrender.com";
 
-export const pingServer = async () => {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/test`);
-        return await response.json();
-    } catch (error) {
-        return { message: "❌ Connection failed. Check CORS or your VITE_BACKEND_URL." };
-    }
-};
-
-export const fetchMockLawyer = async () => {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/mock/lawyer`);
-        return await response.json();
-    } catch (error) {
-        return { error: "❌ Failed to fetch data from the backend." };
-    }
+export const api = {
+    // Check if server is awake
+    testConnection: () => fetch(`${BACKEND_URL}/api/test`).then(res => res.json()),
+    
+    // Get Mock Data (lawyer, background, mobile, precedent)
+    getMockData: (category) => fetch(`${BACKEND_URL}/api/mock/${category}`).then(res => res.json()),
+    
+    // Send text to Gemini AI
+    analyzeText: (text) => fetch(`${BACKEND_URL}/api/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+    }).then(res => res.json())
 };
