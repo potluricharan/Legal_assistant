@@ -44,3 +44,48 @@ Legal_assistant/
 │   └── precedents/              # Legal dataset reference files
 ├── .gitignore
 └── README.md
+
+## ⚙️ Setup & Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone [https://github.com/potluricharan/Legal_assistant.git](https://github.com/potluricharan/Legal_assistant.git)
+cd Legal_assistant
+```
+
+### 2. Configure Environment & Credentials
+
+1. Place your Firebase service account private key in `backend/` as `serviceAccountKey (2).json`.
+2. Create a `.env` file inside `backend/`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 3. Backend Setup
+
+```bash
+cd backend
+pip install -r requirements.txt
+pip install python-multipart
+uvicorn main:app --reload --port 8000
+```
+
+### 4. Frontend Setup
+
+Open a new terminal session and run:
+
+```bash
+cd frontend
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+---
+
+## 🔌 API Reference
+
+- `POST /analyze`: Extracts text from an uploaded PDF, calculates hash, computes vector embeddings, and stores structured records in Firestore.
+- `GET /search?q={query}`: Conducts cosine similarity matching across stored case vectors.
+- `POST /chat_with_history`: Queries the conversational assistant using session chat history.
