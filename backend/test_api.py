@@ -18,7 +18,7 @@ def test_connection():
     try:
         # 3. Try a simple prompt using gemini-1.5-flash
         response = client.models.generate_content(
-            model="gemini-1.5-flash", 
+            model="gemini-3.6-flash", 
             contents="Say 'The legal system is ready' if you can hear me."
         )
         print(f"✅ Success! Gemini says: {response.text}")

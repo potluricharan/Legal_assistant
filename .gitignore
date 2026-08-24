@@ -1,2 +1,21 @@
+# 1. Secret keys & environment variables (CRITICAL)
 .env
-serviceAccountKey.json
+*.env
+serviceAccountKey*.json
+*.json
+
+# 2. Python bytecode & cache directories
+__pycache__/
+*.py[cod]
+*$py.class
+__pycache__.zip
+
+# 3. Virtual environments
+venv/
+.venv/
+env/
+
+# 4. Machine learning models & local databases
+*.pkl
+*.db
+temp_*
